@@ -22,7 +22,11 @@ try {
     // Подключаемся к серверу
     $pdo = new PDO("mysql:host=$hostname;dbname=$db_name", $username, $password);
     // SQL-выражение для создания таблицы
-    $sql = "CREATE TABLE IF NOT EXISTS `users` (`id` INT AUTO_INCREMENT PRIMARY KEY, `telegram_id` BIGINT NOT NULL UNIQUE, `balance` DECIMAL(10,2) NOT NULL DEFAULT 0.00) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+    $sql = "CREATE TABLE IF NOT EXISTS `users` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `telegram_id` BIGINT NOT NULL UNIQUE,
+            `balance` DECIMAL(10,2) NOT NULL DEFAULT 0.00
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
     // Выполняем SQL-выражение
     $pdo->exec($sql);
 } catch (PDOException $e) {
@@ -81,7 +85,7 @@ if (! empty($message) || $message == 0) {
         }
         // Если новый баланс равен или превышает $100000000, показываем предупреждение
         elseif ($new_balance >= 100000000) {
-            sendMessage($bot_token, $chat_id, "Сумма не зачислена. К сожалению, наш банк не может обслуживать счёт с суммой от $100000000.");
+            sendMessage($bot_token, $chat_id, "Сумма не зачислена. К сожалению, мы не можем обслуживать счёт с суммой от $100000000.");
         }
         // Иначе обновляем баланс пользователя
         else {
