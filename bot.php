@@ -91,10 +91,21 @@ if (! empty($message) || $message == 0) {
         else {
             $pdo->beginTransaction();
             try {
-                $stmt = $pdo->prepare("UPDATE users SET balance = :balance WHERE telegram_id = :telegram_id");
-                $stmt->execute(['balance' => $new_balance, 'telegram_id' => $chat_id]);
-                $pdo->commit();
-                sendMessage($bot_token, $chat_id, "Ваш новый баланс: $$new_balance");
+                // Повторно получаем текущий баланс пользователя
+                $stmt = $pdo->prepare("SELECT balance FROM users WHERE telegram_id = :telegram_id");
+                $stmt->execute(['telegram_id' => $chat_id]);
+                $user_balance_again = $stmt->fetchColumn();
+
+                if ($user_balance_again == $user_balance) {
+                    $stmt = $pdo->prepare("UPDATE users SET balance = :balance WHERE telegram_id = :telegram_id");
+                    $stmt->execute(['balance' => $new_balance, 'telegram_id' => $chat_id]);
+                    $pdo->commit();
+                    sendMessage($bot_token, $chat_id, "Ваш новый баланс: $$new_balance");
+                }
+                else {
+                    $pdo->rollBack();
+                    sendMessage($bot_token, $chat_id, "Произошла ошибка. Попробуйте снова.");
+                }
             } catch (Exception $e) {
                 $pdo->rollBack();
                 sendMessage($bot_token, $chat_id, "Произошла ошибка. Попробуйте снова.");
